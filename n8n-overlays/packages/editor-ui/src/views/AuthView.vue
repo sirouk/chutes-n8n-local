@@ -110,6 +110,7 @@ body {
 }
 
 .passwordToggleContainer {
+	margin-top: var(--spacing--m);
 	padding-bottom: var(--spacing--xl);
 	text-align: center;
 }
