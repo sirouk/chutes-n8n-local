@@ -115,6 +115,16 @@ for file in "$PROJECT_DIR/install" "$PROJECT_DIR/bootstrap.sh" "$PROJECT_DIR/scr
     fi
 done
 
+if command -v shellcheck >/dev/null 2>&1; then
+    if shellcheck -x "$PROJECT_DIR/install" "$PROJECT_DIR/bootstrap.sh" "$PROJECT_DIR/scripts/"*.sh >/dev/null 2>&1; then
+        pass "shellcheck shell scripts"
+    else
+        fail "shellcheck shell scripts"
+    fi
+else
+    skip "shellcheck not installed - skipping shell lint"
+fi
+
 if command -v node >/dev/null 2>&1; then
     if node --check "$PROJECT_DIR/scripts/apply-n8n-overlay.mjs" >/dev/null 2>&1; then
         pass "node --check apply-n8n-overlay.mjs"
@@ -183,7 +193,7 @@ if [ ! -f "$PROJECT_DIR/.env" ]; then
 fi
 
 set -a
-# shellcheck disable=SC1090
+# shellcheck source=/dev/null
 source "$PROJECT_DIR/.env"
 set +a
 

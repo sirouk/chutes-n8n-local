@@ -119,7 +119,7 @@ query_scalar() {
 
 load_env() {
     set -a
-    # shellcheck disable=SC1090
+    # shellcheck source=/dev/null
     source "$PROJECT_DIR/.env"
     set +a
 }

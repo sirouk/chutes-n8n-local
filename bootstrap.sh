@@ -27,7 +27,6 @@ PROJECT_N8N_VERSION="2.12.1"
 PROJECT_N8N_SOURCE_REPO="https://github.com/n8n-io/n8n.git"
 PROJECT_NODES_REPO="https://github.com/chutesai/n8n-nodes-chutes.git"
 PROJECT_NODES_REF="main"
-FORCE=false
 FORCE_ALL=false
 RESET_OWNER_PASSWORD=false
 DOWN=false
@@ -41,9 +40,9 @@ fi
 
 for arg in "$@"; do
     case "$arg" in
-        --force) FORCE=true ;;
-        --wipe) FORCE=true; FORCE_ALL=true; INSTALL_ACTION="wipe" ;;
-        --force-all) FORCE=true; FORCE_ALL=true ;;
+        --force) INSTALL_ACTION="update" ;;
+        --wipe) FORCE_ALL=true; INSTALL_ACTION="wipe" ;;
+        --force-all) FORCE_ALL=true ;;
         --reset-owner-password) RESET_OWNER_PASSWORD=true ;;
         --down) DOWN=true ;;
         *)
@@ -146,13 +145,13 @@ restore_env_override() {
 
     if [ "${!is_set_var:-false}" = "true" ]; then
         printf -v "$var_name" '%s' "${!value_var}"
-        export "$var_name"
+        export "${var_name?}"
     fi
 }
 
 load_env_file() {
     set -a
-    # shellcheck disable=SC1090
+    # shellcheck source=/dev/null
     source "$1"
     set +a
 }
