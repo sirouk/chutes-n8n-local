@@ -1,55 +1,89 @@
 # chutes-n8n-embed
 
-Self-hosted n8n with:
+Self-hosted n8n with native `Sign in with Chutes`, bundled `n8n-nodes-chutes`, local `e2ee-local-proxy.chutes.dev` mode, and public-domain mode with ACME.
 
-- native `Sign in with Chutes` on Community n8n
-- baked-in `n8n-nodes-chutes`
-- local mode via the embedded `e2ee-proxy` certificate path
-- public-domain mode via Caddy and ACME
-- repeatable end-to-end coverage using a local test IdP
+## Quick Start
 
-## Layout
+macOS/Linux:
 
-- `bootstrap.sh`: primary install/reconfigure entry point
-- `docker-compose*.yml`: base, local, domain, and test-IdP stacks
-- `Dockerfile.n8n`: pinned n8n build with overlays and bundled Chutes nodes
-- `Dockerfile.local-proxy`: local edge image for `e2ee-local-proxy.chutes.dev`
-- `scripts/smoke-test.sh`: syntax/runtime smoke checks
-- `scripts/e2e-test.sh`: destructive local E2E against the test Chutes IdP
-- `n8n-overlays/`: native n8n SSO and UI overlays
-- `tests/fake-chutes-idp/`: local test IdP used by CI and local E2E
-
-## Local Development
-
-This repo expects `n8n-nodes-chutes` to exist as a sibling checkout:
-
-```text
-workspace/
-├── chutes-n8n-embed/
-└── n8n-nodes-chutes/
+```bash
+curl -fsSL https://raw.githubusercontent.com/chutesai/chutes-n8n-embed/main/install | bash
 ```
 
-`bootstrap.sh` syncs that sibling repo into `build/n8n-nodes-chutes/` before building the custom n8n image. On reruns, bootstrap also attempts a safe fast-forward refresh of the sibling `n8n-nodes-chutes` checkout when the branch is clean and has an upstream.
+The installer:
+
+- clones or refreshes `chutesai/chutes-n8n-embed`
+- runs `bootstrap.sh`
+- auto-clones `chutesai/n8n-nodes-chutes` beside it if missing
+- fast-forwards `n8n-nodes-chutes` on clean reruns so the embedded nodes do not drift stale
+
+## Manual Clone
+
+HTTPS:
+
+```bash
+git clone https://github.com/chutesai/chutes-n8n-embed.git
+cd chutes-n8n-embed
+./bootstrap.sh
+```
+
+SSH:
+
+```bash
+git clone git@github.com:chutesai/chutes-n8n-embed.git
+cd chutes-n8n-embed
+./bootstrap.sh
+```
+
+If `../n8n-nodes-chutes` is missing, bootstrap will clone:
+
+```text
+https://github.com/chutesai/n8n-nodes-chutes.git
+```
+
+You can override that source if needed with:
+
+```bash
+CHUTES_N8N_NODES_GIT_URL=git@github.com:chutesai/n8n-nodes-chutes.git ./bootstrap.sh
+```
 
 ## Bootstrap
 
 ```bash
 ./bootstrap.sh
 ./bootstrap.sh --force
+./bootstrap.sh --wipe
 ./bootstrap.sh --reset-owner-password
 ./bootstrap.sh --down
 ```
 
-The script prompts for:
+Bootstrap asks for:
 
 - install mode: `local` or `domain`
-- rerun action on an existing install: `update` or `wipe` with `update` as the default
-- Chutes OAuth client ID / secret
-- ACME email when using a public domain
+- existing-install action: `update` or `wipe`
+- Chutes OAuth client ID and secret
+- ACME email for `domain` installs
 
-`update` rebuilds and reapplies configuration while preserving the existing Postgres and n8n data volumes. `wipe` recreates the stack from scratch, including data volumes and encrypted n8n state.
+Mode behavior:
 
-## Quality Gates
+- `local`: serves n8n at `https://e2ee-local-proxy.chutes.dev` using the embedded e2ee-proxy certificate path
+- `domain`: serves n8n on your real domain through Caddy with Let's Encrypt
+
+Existing install behavior:
+
+- `update` is the default and preserves Postgres and n8n data volumes
+- `wipe` removes containers, volumes, and encrypted n8n state, then recreates everything cleanly
+
+## What Bootstrap Builds
+
+- patched Community n8n with native Chutes SSO
+- baked-in `n8n-nodes-chutes`
+- `postgres`
+- one edge service:
+  - `local-proxy` for local installs
+  - `caddy` for public-domain installs
+
+## Quality
 
 ```bash
 ./scripts/smoke-test.sh --syntax
@@ -57,14 +91,17 @@ The script prompts for:
 ./scripts/e2e-test.sh
 ```
 
-- `smoke-test.sh --syntax` is safe everywhere
-- `e2e-test.sh` is destructive and recreates the local stack from scratch
+- `smoke-test.sh --syntax` is safe anywhere
+- `e2e-test.sh` is destructive and rebuilds the local test stack
 
-## CI
+CI runs syntax smoke checks plus the local test-IdP end-to-end path.
 
-The GitHub Actions workflow runs:
+## Repo Layout
 
-- syntax smoke checks
-- local test-IdP E2E
-
-The CI job checks out `n8n-nodes-chutes` as a sibling repository so the build path matches local development.
+- `install`: one-line bootstrap entrypoint used by the raw GitHub quick start
+- `bootstrap.sh`: main install and update entrypoint
+- `docker-compose*.yml`: base, local, domain, and test stacks
+- `Dockerfile.n8n`: pinned n8n build with SSO overlays and bundled Chutes nodes
+- `n8n-overlays/`: native n8n backend and UI changes
+- `scripts/`: bootstrap helpers, smoke tests, and E2E coverage
+- `tests/fake-chutes-idp/`: local test IdP for CI and destructive local E2E

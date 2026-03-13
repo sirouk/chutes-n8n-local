@@ -25,6 +25,8 @@ ENV_FILE="$SCRIPT_DIR/.env"
 LOCAL_HOSTNAME="e2ee-local-proxy.chutes.dev"
 PROJECT_N8N_VERSION="2.12.1"
 PROJECT_N8N_SOURCE_REPO="https://github.com/n8n-io/n8n.git"
+PROJECT_NODES_REPO="https://github.com/chutesai/n8n-nodes-chutes.git"
+PROJECT_NODES_REF="main"
 FORCE=false
 FORCE_ALL=false
 RESET_OWNER_PASSWORD=false
@@ -510,6 +512,47 @@ refresh_local_dependency_checkout() {
     warn "${repo_name} has diverged from ${upstream}; using the current checkout without pulling"
 }
 
+ensure_dependency_checkout() {
+    local repo_dir="$1"
+    local repo_url="$2"
+    local repo_ref="$3"
+    local repo_name
+    local tmp_dir
+
+    repo_name="$(basename "$repo_dir")"
+
+    if [ -d "$repo_dir" ]; then
+        return
+    fi
+
+    require_cmd git
+
+    mkdir -p "$(dirname "$repo_dir")"
+    tmp_dir="${repo_dir}.tmp.$$"
+    rm -rf "$tmp_dir"
+
+    info "${repo_name} not found; cloning ${repo_url} (${repo_ref}) ..."
+
+    if git clone --depth 1 --branch "$repo_ref" "$repo_url" "$tmp_dir" >/dev/null 2>&1; then
+        mv "$tmp_dir" "$repo_dir"
+        ok "${repo_name} cloned"
+        return
+    fi
+
+    warn "Shallow clone for ${repo_name} failed; retrying with a full checkout"
+    rm -rf "$tmp_dir"
+
+    if git clone "$repo_url" "$tmp_dir" >/dev/null 2>&1 && git -C "$tmp_dir" checkout "$repo_ref" >/dev/null 2>&1; then
+        mv "$tmp_dir" "$repo_dir"
+        ok "${repo_name} cloned"
+        return
+    fi
+
+    rm -rf "$tmp_dir"
+    err "Failed to clone ${repo_name} from ${repo_url}"
+    exit 1
+}
+
 prompt_install_mode() {
     local answer
 
@@ -808,10 +851,10 @@ fi
 NODES_SRC="$SCRIPT_DIR/../n8n-nodes-chutes"
 BUILD_DIR="$SCRIPT_DIR/build/n8n-nodes-chutes"
 
-if [ ! -d "$NODES_SRC" ]; then
-    err "n8n-nodes-chutes not found at $NODES_SRC"
-    exit 1
-fi
+ensure_dependency_checkout \
+    "$NODES_SRC" \
+    "${CHUTES_N8N_NODES_GIT_URL:-$PROJECT_NODES_REPO}" \
+    "${CHUTES_N8N_NODES_GIT_REF:-$PROJECT_NODES_REF}"
 
 refresh_local_dependency_checkout "$NODES_SRC"
 
