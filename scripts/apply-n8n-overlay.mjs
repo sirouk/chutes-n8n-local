@@ -169,7 +169,7 @@ patch('packages/cli/src/services/frontend.service.ts', (content) => {
 			Boolean(process.env.CHUTES_OAUTH_CLIENT_ID?.trim()) &&
 			Boolean(process.env.CHUTES_OAUTH_CLIENT_SECRET?.trim());
 		const chutesSsoLoginLabel =
-			process.env.CHUTES_SSO_LOGIN_LABEL?.trim() || 'Continue with Chutes';
+			process.env.CHUTES_SSO_LOGIN_LABEL?.trim() || 'Login with Chutes';
 
 		this.settings = {`,
 		'packages/cli/src/services/frontend.service.ts',
@@ -231,7 +231,7 @@ patch('packages/cli/src/services/frontend.service.ts', (content) => {
 			loginEnabled:
 				Boolean(process.env.CHUTES_OAUTH_CLIENT_ID?.trim()) &&
 				Boolean(process.env.CHUTES_OAUTH_CLIENT_SECRET?.trim()),
-			loginLabel: process.env.CHUTES_SSO_LOGIN_LABEL?.trim() || 'Continue with Chutes',
+			loginLabel: process.env.CHUTES_SSO_LOGIN_LABEL?.trim() || 'Login with Chutes',
 		});`,
 		'packages/cli/src/services/frontend.service.ts',
 	);

@@ -104,4 +104,4 @@ CI runs syntax smoke checks plus the local test-IdP end-to-end path.
 - `Dockerfile.n8n`: pinned n8n build with SSO overlays and bundled Chutes nodes
 - `n8n-overlays/`: native n8n backend and UI changes
 - `scripts/`: bootstrap helpers, smoke tests, and E2E coverage
-- `tests/fake-chutes-idp/`: local test IdP for CI and destructive local E2E
+- `tests/test-chutes-idp/`: local test IdP for CI and destructive local E2E

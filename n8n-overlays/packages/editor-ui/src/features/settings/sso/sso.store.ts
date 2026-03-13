@@ -24,7 +24,7 @@ export const useSSOStore = defineStore('sso', () => {
 
 	const chutes = ref({
 		loginEnabled: false,
-		loginLabel: 'Continue with Chutes',
+		loginLabel: 'Login with Chutes',
 	});
 
 	const isChutesLoginEnabled = computed(() => chutes.value.loginEnabled);

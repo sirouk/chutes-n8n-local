@@ -251,7 +251,7 @@ fi
 settings_json="$(curl_edge -sk "https://${N8N_HOST}/rest/settings" 2>/dev/null || true)"
 sso_enabled="$(printf '%s' "$settings_json" | json_query '.data.sso.chutes.loginEnabled' 2>/dev/null || true)"
 sso_label="$(printf '%s' "$settings_json" | json_query '.data.sso.chutes.loginLabel' 2>/dev/null || true)"
-if [ "$sso_enabled" = "true" ] && [ "$sso_label" = "${CHUTES_SSO_LOGIN_LABEL:-Continue with Chutes}" ]; then
+if [ "$sso_enabled" = "true" ] && [ "$sso_label" = "${CHUTES_SSO_LOGIN_LABEL:-Login with Chutes}" ]; then
     pass "frontend settings expose Chutes SSO"
 else
     fail "frontend settings are missing Chutes SSO"

@@ -6,8 +6,8 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
-CLIENT_ID = os.environ.get("FAKE_CHUTES_CLIENT_ID", "test-client")
-CLIENT_SECRET = os.environ.get("FAKE_CHUTES_CLIENT_SECRET", "test secret")
+CLIENT_ID = os.environ.get("TEST_CHUTES_CLIENT_ID", "test-client")
+CLIENT_SECRET = os.environ.get("TEST_CHUTES_CLIENT_SECRET", "test secret")
 USERS = {
     "member-code": {"sub": "sub-member", "username": "member-user", "created_at": "2026-01-01T00:00:00Z"},
     "admin-code": {"sub": "sub-admin", "username": "admin-user", "created_at": "2026-01-02T00:00:00Z"},

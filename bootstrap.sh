@@ -331,7 +331,7 @@ check_owner_login() {
 
 is_placeholder_client_id() {
     case "$1" in
-        ""|fake-chutes-client|dummy-client|example-client-id|changeme)
+        ""|test-chutes-client|dummy-client|example-client-id|changeme)
             return 0
             ;;
         *)
@@ -342,10 +342,10 @@ is_placeholder_client_id() {
 
 is_placeholder_client_secret() {
     case "$1" in
-        ""|fake-secret|dummy-secret|changeme)
+        ""|test-secret|dummy-secret|changeme)
             return 0
             ;;
-        *"fake secret"*|*"example.invalid"*|*"changeme"*)
+        *"test secret"*|*"example.invalid"*|*"changeme"*)
             return 0
             ;;
         *)
@@ -700,7 +700,7 @@ POSTGRES_DB="${POSTGRES_DB:-n8n}"
 N8N_ADMIN_EMAIL="${N8N_ADMIN_EMAIL:-admin@chutes.local}"
 N8N_EXPIRABLE_CREDENTIAL_REFRESH_WINDOW_SECONDS="${N8N_EXPIRABLE_CREDENTIAL_REFRESH_WINDOW_SECONDS:-300}"
 CHUTES_IDP_BASE_URL="${CHUTES_IDP_BASE_URL:-https://api.chutes.ai}"
-CHUTES_SSO_LOGIN_LABEL="${CHUTES_SSO_LOGIN_LABEL:-Continue with Chutes}"
+CHUTES_SSO_LOGIN_LABEL="${CHUTES_SSO_LOGIN_LABEL:-Login with Chutes}"
 CHUTES_SSO_SCOPES="${CHUTES_SSO_SCOPES:-openid profile chutes:read chutes:invoke}"
 CHUTES_ADMIN_USERNAMES="${CHUTES_ADMIN_USERNAMES:-}"
 CHUTES_API_KEY="${CHUTES_API_KEY:-}"

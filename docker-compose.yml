@@ -54,7 +54,7 @@ services:
       - CHUTES_OAUTH_CLIENT_ID=${CHUTES_OAUTH_CLIENT_ID}
       - CHUTES_OAUTH_CLIENT_SECRET=${CHUTES_OAUTH_CLIENT_SECRET}
       - CHUTES_IDP_BASE_URL=${CHUTES_IDP_BASE_URL:-https://api.chutes.ai}
-      - CHUTES_SSO_LOGIN_LABEL=${CHUTES_SSO_LOGIN_LABEL:-Continue with Chutes}
+      - CHUTES_SSO_LOGIN_LABEL=${CHUTES_SSO_LOGIN_LABEL:-Login with Chutes}
       - CHUTES_SSO_SCOPES=${CHUTES_SSO_SCOPES:-openid profile chutes:read chutes:invoke}
       - CHUTES_ADMIN_USERNAMES=${CHUTES_ADMIN_USERNAMES:-}
     volumes:

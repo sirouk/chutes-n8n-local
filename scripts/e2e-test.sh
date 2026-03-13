@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Destructive end-to-end test for chutes-n8n-embed.
-# Uses a fake local Chutes IdP and recreates the local stack from scratch.
+# Uses a test local Chutes IdP and recreates the local stack from scratch.
 #
 set -euo pipefail
 
@@ -127,7 +127,7 @@ load_env() {
 owner_login() {
     curl_edge -sk -H 'Content-Type: application/json' \
         -H 'browser-id: e2e-owner-browser' \
-        -d "$(printf '{"email":"%s","password":"%s"}' "$N8N_ADMIN_EMAIL" "$N8N_ADMIN_PASSWORD")" \
+        -d "$(printf '{"emailOrLdapLoginId":"%s","password":"%s"}' "$N8N_ADMIN_EMAIL" "$N8N_ADMIN_PASSWORD")" \
         "https://${N8N_HOST}/rest/login"
 }
 
@@ -340,9 +340,9 @@ compose down -v --remove-orphans >/dev/null 2>&1 || true
 export INSTALL_MODE="local"
 export CHUTES_COMPOSE_FILES="$COMPOSE_FILES"
 export N8N_HOST="e2ee-local-proxy.chutes.dev"
-export CHUTES_OAUTH_CLIENT_ID="fake-chutes-client"
-export CHUTES_OAUTH_CLIENT_SECRET='fake secret with spaces $ and # and "quotes"'
-export CHUTES_IDP_BASE_URL="http://fake-chutes-idp:8080"
+export CHUTES_OAUTH_CLIENT_ID="test-chutes-client"
+export CHUTES_OAUTH_CLIENT_SECRET='test secret with spaces $ and # and "quotes"'
+export CHUTES_IDP_BASE_URL="http://test-chutes-idp:8080"
 export CHUTES_ADMIN_USERNAMES="admin-user"
 export CHUTES_API_KEY="cpk_test_e2e.0123456789abcdef.abcdef0123456789"
 
@@ -378,7 +378,7 @@ assert_eq "$(user_role_for_subject "sub-member")" "global:member" "member SSO us
 assert_eq "$(user_count_for_subject "sub-member")" "1" "member SSO identity should be created exactly once"
 assert_eq "$(managed_credential_count_for_subject "sub-member")" "1" "member SSO login should create exactly one managed Chutes credential"
 
-set_managed_credential_custom_url "sub-member" "http://fake-chutes-idp:8080"
+set_managed_credential_custom_url "sub-member" "http://test-chutes-idp:8080"
 member_refresh_before="$(managed_credential_field_for_subject "sub-member" "refreshToken")"
 member_session_before="$(managed_credential_field_for_subject "sub-member" "sessionToken")"
 assert_eq "$member_refresh_before" "refresh:member-code:0" "member SSO credential should start with the initial refresh token"

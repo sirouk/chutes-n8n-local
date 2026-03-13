@@ -1,14 +1,14 @@
 services:
-  fake-chutes-idp:
+  test-chutes-idp:
     image: python:3.14-alpine3.23
-    container_name: n8n-fake-chutes-idp
+    container_name: n8n-test-chutes-idp
     working_dir: /app
     command: ["python", "/app/server.py"]
     environment:
-      FAKE_CHUTES_CLIENT_ID: ${CHUTES_OAUTH_CLIENT_ID}
-      FAKE_CHUTES_CLIENT_SECRET: ${CHUTES_OAUTH_CLIENT_SECRET}
+      TEST_CHUTES_CLIENT_ID: ${CHUTES_OAUTH_CLIENT_ID}
+      TEST_CHUTES_CLIENT_SECRET: ${CHUTES_OAUTH_CLIENT_SECRET}
     volumes:
-      - ./tests/fake-chutes-idp:/app:ro
+      - ./tests/test-chutes-idp:/app:ro
     healthcheck:
       test:
         [
@@ -27,8 +27,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      fake-chutes-idp:
+      test-chutes-idp:
         condition: service_healthy
     environment:
-      - CHUTES_IDP_BASE_URL=http://fake-chutes-idp:8080
+      - CHUTES_IDP_BASE_URL=http://test-chutes-idp:8080
       - CHUTES_ADMIN_USERNAMES=${CHUTES_ADMIN_USERNAMES:-admin-user}

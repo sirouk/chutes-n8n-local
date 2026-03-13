@@ -381,7 +381,7 @@ export class ChutesSsoService {
 
 		const grantedList = Array.from(grantedScopes).join(' ') || 'none';
 		throw new AuthError(
-			`Chutes login did not grant the required scopes (${missingScopes.join(', ')}). Granted scopes: ${grantedList}. Continue with Chutes again, and if you already approved this app once, revoke the existing n8n authorization in your Chutes account settings before retrying.`,
+			`Chutes login did not grant the required scopes (${missingScopes.join(', ')}). Granted scopes: ${grantedList}. Login with Chutes again, and if you already approved this app once, revoke the existing n8n authorization in your Chutes account settings before retrying.`,
 		);
 	}
 

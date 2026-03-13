@@ -89,8 +89,11 @@ body {
 .container {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	flex-direction: column;
-	padding-top: var(--spacing--2xl);
+	min-height: 100vh;
+	padding: var(--spacing--3xl) 0;
+	box-sizing: border-box;
 
 	> * {
 		width: 352px;
@@ -110,7 +113,7 @@ body {
 }
 
 .passwordToggleContainer {
-	margin-top: var(--spacing--m);
+	margin-top: var(--spacing--xl);
 	padding-bottom: var(--spacing--xl);
 	text-align: center;
 }
