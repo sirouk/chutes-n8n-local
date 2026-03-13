@@ -21,18 +21,9 @@ The installer:
 
 ## Manual Clone
 
-HTTPS:
 
 ```bash
 git clone https://github.com/chutesai/chutes-n8n-local.git
-cd chutes-n8n-local
-./bootstrap.sh
-```
-
-SSH:
-
-```bash
-git clone git@github.com:chutesai/chutes-n8n-local.git
 cd chutes-n8n-local
 ./bootstrap.sh
 ```
@@ -43,7 +34,7 @@ If `../n8n-nodes-chutes` is missing, bootstrap will clone:
 https://github.com/chutesai/n8n-nodes-chutes.git
 ```
 
-You can override that source if needed with:
+You can override that source if needed (fork) with:
 
 ```bash
 CHUTES_N8N_NODES_GIT_URL=git@github.com:chutesai/n8n-nodes-chutes.git ./bootstrap.sh
@@ -78,7 +69,7 @@ Existing install behavior:
 
 ## What Bootstrap Builds
 
-- patched Community n8n with native Chutes SSO
+- Community n8n with native Chutes SSO
 - baked-in `n8n-nodes-chutes`
 - `postgres`
 - one edge service:
@@ -107,3 +98,14 @@ CI runs syntax smoke checks plus the local test-IdP end-to-end path.
 - `n8n-overlays/`: native n8n backend and UI changes
 - `scripts/`: bootstrap helpers, smoke tests, and E2E coverage
 - `tests/test-chutes-idp/`: local test IdP for CI and destructive local E2E
+
+## Licensing Note
+
+This project builds on the self-hosted n8n Community Edition and adds Chutes-specific packaging, local/domain deployment, and native Chutes integrations.
+
+Use of upstream n8n remains subject to n8n’s licensing terms, including the Sustainable Use License and any applicable Enterprise licensing. This repository does not modify or replace those upstream license obligations.
+
+Before using this project in a commercial, embedded, hosted-for-others, or customer-facing offering, review the official n8n licensing and Community Edition documentation:
+
+- https://docs.n8n.io/sustainable-use-license/
+- https://docs.n8n.io/hosting/community-edition-features/
