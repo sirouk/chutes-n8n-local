@@ -107,7 +107,7 @@ edge_container_name() {
 
 echo "=== Syntax checks ==="
 
-for file in "$PROJECT_DIR/install" "$PROJECT_DIR/bootstrap.sh" "$PROJECT_DIR/scripts/"*.sh; do
+for file in "$PROJECT_DIR/install.sh" "$PROJECT_DIR/bootstrap.sh" "$PROJECT_DIR/scripts/"*.sh; do
     if bash -n "$file" >/dev/null 2>&1; then
         pass "bash -n $(basename "$file")"
     else
@@ -116,7 +116,7 @@ for file in "$PROJECT_DIR/install" "$PROJECT_DIR/bootstrap.sh" "$PROJECT_DIR/scr
 done
 
 if command -v shellcheck >/dev/null 2>&1; then
-    if shellcheck -x "$PROJECT_DIR/install" "$PROJECT_DIR/bootstrap.sh" "$PROJECT_DIR/scripts/"*.sh >/dev/null 2>&1; then
+    if shellcheck -x "$PROJECT_DIR/install.sh" "$PROJECT_DIR/bootstrap.sh" "$PROJECT_DIR/scripts/"*.sh >/dev/null 2>&1; then
         pass "shellcheck shell scripts"
     else
         fail "shellcheck shell scripts"

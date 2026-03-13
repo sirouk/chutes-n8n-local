@@ -7,7 +7,7 @@ Self-hosted n8n with native `Sign in with Chutes`, bundled `n8n-nodes-chutes`, l
 macOS/Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chutesai/chutes-n8n-embed/main/install | bash
+curl -fsSL https://raw.githubusercontent.com/chutesai/chutes-n8n-embed/main/install.sh | bash
 ```
 
 The installer:
@@ -98,7 +98,7 @@ CI runs syntax smoke checks plus the local test-IdP end-to-end path.
 
 ## Repo Layout
 
-- `install`: one-line bootstrap entrypoint used by the raw GitHub quick start
+- `install.sh`: one-line bootstrap entrypoint used by the raw GitHub quick start
 - `bootstrap.sh`: main install and update entrypoint
 - `docker-compose*.yml`: base, local, domain, and test stacks
 - `Dockerfile.n8n`: pinned n8n build with SSO overlays and bundled Chutes nodes
