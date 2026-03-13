@@ -1,0 +1,26 @@
+services:
+  local-proxy:
+    image: chutes-n8n-embed-local-proxy:latest
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.local-proxy
+      args:
+        E2EE_PROXY_IMAGE: ${E2EE_PROXY_IMAGE:-parachutes/e2ee-proxy:latest}
+    container_name: n8n-local-proxy
+    environment:
+      TLS_DOMAIN: ${N8N_HOST:-e2ee-local-proxy.chutes.dev}
+    ports:
+      - "80:80"
+      - "443:443"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- --no-check-certificate https://127.0.0.1/health >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      n8n:
+        condition: service_healthy
+    networks: [n8n-net]
+    restart: unless-stopped

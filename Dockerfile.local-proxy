@@ -1,0 +1,5 @@
+ARG E2EE_PROXY_IMAGE=parachutes/e2ee-proxy:latest
+
+FROM ${E2EE_PROXY_IMAGE}
+
+COPY conf/local-proxy.nginx.template /usr/local/openresty/nginx/conf/nginx.conf

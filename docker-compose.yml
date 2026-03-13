@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: postgres:15.17-alpine3.23
+    container_name: n8n-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-n8n}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-n8n}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-n8n}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [n8n-net]
+    restart: unless-stopped
+
+  n8n:
+    build:
+      context: .
+      dockerfile: Dockerfile.n8n
+      args:
+        NODE_VERSION: 24.13.1
+        N8N_VERSION: ${N8N_VERSION:-2.12.1}
+        N8N_SOURCE_REPO: ${N8N_SOURCE_REPO:-https://github.com/n8n-io/n8n.git}
+        N8N_SOURCE_REF: ${N8N_SOURCE_REF:-n8n@2.12.1}
+    container_name: n8n
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-n8n}
+      - DB_POSTGRESDB_USER=${POSTGRES_USER:-n8n}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_USER_MANAGEMENT_JWT_SECRET=${N8N_JWT_SECRET}
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PORT=5678
+      - N8N_LISTEN_ADDRESS=0.0.0.0
+      - N8N_PROTOCOL=https
+      - N8N_EDITOR_BASE_URL=https://${N8N_HOST:-localhost}
+      - N8N_PROXY_HOPS=1
+      - N8N_SECURE_COOKIE=true
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - WEBHOOK_URL=https://${N8N_HOST:-localhost}/
+      - N8N_CUSTOM_EXTENSIONS=/opt/custom-nodes
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_VERSION_NOTIFICATIONS_ENABLED=false
+      - N8N_RUNNERS_ENABLED=true
+      - EXECUTIONS_DATA_SAVE_ON_ERROR=all
+      - EXECUTIONS_DATA_SAVE_ON_SUCCESS=all
+      - GENERIC_TIMEZONE=${TZ:-UTC}
+      - CHUTES_OAUTH_CLIENT_ID=${CHUTES_OAUTH_CLIENT_ID}
+      - CHUTES_OAUTH_CLIENT_SECRET=${CHUTES_OAUTH_CLIENT_SECRET}
+      - CHUTES_IDP_BASE_URL=${CHUTES_IDP_BASE_URL:-https://api.chutes.ai}
+      - CHUTES_SSO_LOGIN_LABEL=${CHUTES_SSO_LOGIN_LABEL:-Continue with Chutes}
+      - CHUTES_SSO_SCOPES=${CHUTES_SSO_SCOPES:-openid profile chutes:read chutes:invoke}
+      - CHUTES_ADMIN_USERNAMES=${CHUTES_ADMIN_USERNAMES:-}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:5678/healthz"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks: [n8n-net]
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  n8n_data:
+
+networks:
+  n8n-net:
