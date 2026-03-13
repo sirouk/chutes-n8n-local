@@ -2,7 +2,7 @@
 
 Self-hosted n8n with native `Login with Chutes`, bundled `n8n-nodes-chutes`, local `e2ee-local-proxy.chutes.dev` mode, and public-domain mode with ACME.
 
-Build workflows with Chutes-native auth and multi-modal capabilities, and all node integrations on top of n8n's orchestration, scheduling, webhooks, and automation runtime.
+Build workflows with Chutes-native auth, multi-modal capabilities, and node integrations on top of n8n's orchestration, scheduling, webhooks, and automation runtime.
 
 ## Quick Start
 
