@@ -35,6 +35,227 @@ function copyOverlayFile(sourceRelativePath, destinationRelativePath) {
 
 const RESOURCE_PLACEHOLDER_VALUE = '__choose_resource_type__';
 
+function patchLegacyLoadChutesCompatibility() {
+	const loadChutesFile = path.join(buildDir, 'nodes', 'Chutes', 'methods', 'loadChutes.ts');
+	let source = fs.readFileSync(loadChutesFile, 'utf8');
+
+	if (source.includes('requestWithChutesCredential')) {
+		fs.writeFileSync(loadChutesFile, source);
+		return;
+	}
+
+	source = replaceOrThrow(
+		source,
+		`import { ILoadOptionsFunctions, INodePropertyOptions } from 'n8n-workflow';
+`,
+		`import { ILoadOptionsFunctions, INodePropertyOptions } from 'n8n-workflow';
+import { requestWithChutesCredential } from '../transport/requestWithChutesCredential';
+`,
+		loadChutesFile,
+	);
+
+	source = replaceOrThrow(
+		source,
+		`export interface ChutesListResponse {
+\ttotal: number;
+\tpage: number;
+\tlimit: number;
+\titems: ChuteOption[];
+\tcord_refs: Record<string, any>;
+}
+`,
+		`export interface ChutesListResponse {
+\ttotal: number;
+\tpage: number;
+\tlimit: number;
+\titems: ChuteOption[];
+\tcord_refs: Record<string, any>;
+}
+
+let hasLoggedPublicCatalogFallback = false;
+
+function buildChutesListRequestUrl(includePublic: boolean, limit: number): string {
+\tconst queryParams = new URLSearchParams({
+\t\tinclude_public: String(includePublic),
+\t\tlimit: String(limit),
+\t});
+
+\treturn \`https://api.chutes.ai/chutes/?\${queryParams}\`;
+}
+
+function isPermissionDeniedError(error: unknown): boolean {
+\tif (!error || typeof error !== 'object') {
+\t\treturn false;
+\t}
+
+\tconst candidate = error as {
+\t\thttpCode?: string | number;
+\t\tstatusCode?: string | number;
+\t\tstatus?: string | number;
+\t\tdescription?: string;
+\t\tmessage?: string;
+\t\tresponse?: {
+\t\t\tstatus?: string | number;
+\t\t};
+\t\terror?: {
+\t\t\tdetail?: string;
+\t\t};
+\t};
+
+\tconst statusCode = String(
+\t\tcandidate.httpCode ??
+\t\t\tcandidate.statusCode ??
+\t\t\tcandidate.status ??
+\t\t\tcandidate.response?.status ??
+\t\t\t'',
+\t).trim();
+
+\tif (statusCode !== '403') {
+\t\treturn false;
+\t}
+
+\tconst details = [candidate.description, candidate.message, candidate.error?.detail]
+\t\t.filter((value): value is string => Boolean(value))
+\t\t.join(' ')
+\t\t.toLowerCase();
+
+\treturn details.includes('permission') || details.includes('forbidden');
+}
+
+function isUnauthorizedError(error: unknown): boolean {
+\tif (!error || typeof error !== 'object') {
+\t\treturn false;
+\t}
+
+\tconst candidate = error as {
+\t\thttpCode?: string | number;
+\t\tstatusCode?: string | number;
+\t\tstatus?: string | number;
+\t\tdescription?: string;
+\t\tmessage?: string;
+\t\tresponse?: {
+\t\t\tstatus?: string | number;
+\t\t};
+\t\terror?: {
+\t\t\tdetail?: string;
+\t\t};
+\t};
+
+\tconst statusCode = String(
+\t\tcandidate.httpCode ??
+\t\t\tcandidate.statusCode ??
+\t\t\tcandidate.status ??
+\t\t\tcandidate.response?.status ??
+\t\t\t'',
+\t).trim();
+
+\tif (statusCode !== '401') {
+\t\treturn false;
+\t}
+
+\tconst details = [candidate.description, candidate.message, candidate.error?.detail]
+\t\t.filter((value): value is string => Boolean(value))
+\t\t.join(' ')
+\t\t.toLowerCase();
+
+\treturn (
+\t\tdetails.includes('invalid token') ||
+\t\tdetails.includes('user not found') ||
+\t\tdetails.includes('authorization failed') ||
+\t\tdetails.includes('unauthorized')
+\t);
+}
+
+function isMissingCredentialError(error: unknown): boolean {
+\tif (!error || typeof error !== 'object') {
+\t\treturn false;
+\t}
+
+\tconst candidate = error as {
+\t\tdescription?: string;
+\t\tmessage?: string;
+\t};
+
+\tconst details = [candidate.description, candidate.message]
+\t\t.filter((value): value is string => Boolean(value))
+\t\t.join(' ')
+\t\t.toLowerCase();
+
+\treturn (
+\t\tdetails.includes('does not have any credentials set') ||
+\t\tdetails.includes('missing both an api key and a session token') ||
+\t\t(details.includes('credential') && details.includes('missing'))
+\t);
+}
+
+function shouldFallbackToPublicCatalog(error: unknown): boolean {
+\treturn (
+\t\tisPermissionDeniedError(error) ||
+\t\tisUnauthorizedError(error) ||
+\t\tisMissingCredentialError(error)
+\t);
+}
+
+async function requestPublicChutesWithoutAuth(
+\tcontext: ILoadOptionsFunctions,
+\turl: string,
+): Promise<ChutesListResponse> {
+\treturn await context.helpers.request({
+\t\tjson: true,
+\t\tmethod: 'GET',
+\t\turl,
+\t\theaders: {
+\t\t\tAccept: 'application/json',
+\t\t\t'Content-Type': 'application/json',
+\t\t},
+\t});
+}
+`,
+		loadChutesFile,
+	);
+
+	source = replaceRegexOrThrow(
+		source,
+		/async function getRawChutes\(\s*context: ILoadOptionsFunctions,\s*includePublic = true,\s*limit = 500,\s*\): Promise<ChuteOption\[]> \{[\s\S]*?return chutesData\.items \|\| \[\];\n\}/,
+		`async function getRawChutes(
+\tcontext: ILoadOptionsFunctions,
+\tincludePublic = true,
+\tlimit = 500,
+): Promise<ChuteOption[]> {
+\tconst url = buildChutesListRequestUrl(includePublic, limit);
+
+\tlet response: unknown;
+\ttry {
+\t\tresponse = await requestWithChutesCredential(context, {
+\t\t\tmethod: 'GET',
+\t\t\turl,
+\t\t\theaders: {
+\t\t\t\t'Content-Type': 'application/json',
+\t\t\t},
+\t\t});
+\t} catch (error) {
+\t\tif (!includePublic || !shouldFallbackToPublicCatalog(error)) {
+\t\t\tthrow error;
+\t\t}
+
+\t\tif (!hasLoggedPublicCatalogFallback) {
+\t\t\tconsole.warn(
+\t\t\t\t'Authenticated chute discovery was unavailable, retrying the public catalog without credentials.',
+\t\t\t);
+\t\t\thasLoggedPublicCatalogFallback = true;
+\t\t}
+\t\tresponse = await requestPublicChutesWithoutAuth(context, url);
+\t}
+
+\tconst chutesData = response as ChutesListResponse;
+\treturn chutesData.items || [];
+}`,
+		loadChutesFile,
+	);
+
+	fs.writeFileSync(loadChutesFile, source);
+}
+
 function patchCredentialTestBaseUrl() {
 	const credentialFile = path.join(buildDir, 'credentials', 'ChutesApi.credentials.ts');
 	let source = fs.readFileSync(credentialFile, 'utf8');
@@ -186,7 +407,7 @@ function patchResourceAwareChuteLoading() {
 	const loadChutesFile = path.join(buildDir, 'nodes', 'Chutes', 'methods', 'loadChutes.ts');
 	let source = fs.readFileSync(loadChutesFile, 'utf8');
 
-	if (!source.includes('requestWithChutesCredential')) {
+	if (!source.includes('requestWithChutesCredential') || !source.includes('getChutesForSelectedResource')) {
 		// Older upstream node revisions still use resource-specific chute fields, so the
 		// resource-aware shared-dropdown patch is not needed for that shape.
 		return;
@@ -301,6 +522,11 @@ const SELECT_RESOURCE_TYPE_OPTION: INodePropertyOptions = {
 function patchTextProxyModelSelection() {
 	const loadChutesFile = path.join(buildDir, 'nodes', 'Chutes', 'methods', 'loadChutes.ts');
 	let source = fs.readFileSync(loadChutesFile, 'utf8');
+
+	if (!source.includes('getChutesForSelectedResource')) {
+		fs.writeFileSync(loadChutesFile, source);
+		return;
+	}
 
 	if (!source.includes('function isChutesTextProxyMode(): boolean')) {
 		source = replaceOrThrow(
@@ -453,6 +679,7 @@ function patchNeutralNodeCreatorFlow() {
 
 patchCredentialTestBaseUrl();
 patchTrafficModeRouting();
+patchLegacyLoadChutesCompatibility();
 patchResourceChooser();
 patchResourceAwareChuteLoading();
 patchTextProxyModelSelection();
