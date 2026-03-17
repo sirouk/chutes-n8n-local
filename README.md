@@ -9,7 +9,8 @@ Build workflows with Chutes-native auth, multi-modal capabilities, and node inte
 macOS/Linux/WSL:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/chutesai/chutes-n8n-local/main/deploy.sh)
+bash <(curl -fsSL -H 'Cache-Control: no-cache' \
+  "https://raw.githubusercontent.com/chutesai/chutes-n8n-local/main/deploy.sh?$(date +%s)")
 ```
 
 The deploy script:
