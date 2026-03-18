@@ -8,7 +8,12 @@ on:
       - DEV
       - "beta-*"
   pull_request:
+  workflow_call:
   workflow_dispatch:
+
+env:
+  N8N_NODES_CHUTES_REPO: sirouk/n8n-nodes-chutes
+  N8N_NODES_CHUTES_REF: d98eb1c02e966a99eb0c8ce66434feaa2c9049c3
 
 jobs:
   syntax-smoke:
@@ -48,8 +53,8 @@ jobs:
       - name: Checkout n8n-nodes-chutes
         uses: actions/checkout@v6
         with:
-          repository: sirouk/n8n-nodes-chutes
-          ref: d98eb1c02e966a99eb0c8ce66434feaa2c9049c3
+          repository: ${{ env.N8N_NODES_CHUTES_REPO }}
+          ref: ${{ env.N8N_NODES_CHUTES_REF }}
           path: n8n-nodes-chutes
 
       - name: Set up Node.js

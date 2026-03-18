@@ -16,35 +16,19 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  N8N_NODES_CHUTES_REPO: sirouk/n8n-nodes-chutes
+  N8N_NODES_CHUTES_REF: d98eb1c02e966a99eb0c8ce66434feaa2c9049c3
 
 jobs:
-  syntax-smoke:
-    name: Syntax Smoke
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout chutes-n8n-local
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-
-      - name: Install shellcheck
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y shellcheck
-
-      - name: Run syntax smoke checks
-        run: ./scripts/smoke-test.sh --syntax
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
 
   build-and-push:
     name: Build & Push Image
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    needs: syntax-smoke
+    needs: ci
 
     steps:
       - name: Checkout chutes-n8n-local
@@ -53,8 +37,8 @@ jobs:
       - name: Checkout n8n-nodes-chutes
         uses: actions/checkout@v6
         with:
-          repository: sirouk/n8n-nodes-chutes
-          ref: d98eb1c02e966a99eb0c8ce66434feaa2c9049c3
+          repository: ${{ env.N8N_NODES_CHUTES_REPO }}
+          ref: ${{ env.N8N_NODES_CHUTES_REF }}
           path: _n8n-nodes-chutes
 
       - name: Set up Node.js
