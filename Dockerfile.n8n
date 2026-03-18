@@ -59,6 +59,7 @@ ARG N8N_VERSION
 
 ENV NODE_ENV=production
 ENV SHELL=/bin/sh
+ENV N8N_CUSTOM_EXTENSIONS=/opt/custom-nodes
 
 WORKDIR /home/node
 
