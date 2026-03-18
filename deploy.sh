@@ -1287,7 +1287,11 @@ echo
 if [ "$OWNER_PASSWORD_VALID" = true ]; then
     echo "  Break-glass owner:"
     echo "    Email:    ${N8N_ADMIN_EMAIL}"
-    echo -e "    Password: ${BOLD}${N8N_ADMIN_PASSWORD}${NC}"
+    if [ "$INTERACTIVE" = true ]; then
+        echo -e "    Password: ${BOLD}${N8N_ADMIN_PASSWORD}${NC}"
+    else
+        echo "    Password: (stored in .env — run interactively to display)"
+    fi
 else
     warn "Stored owner credentials could not be verified."
     warn "Run ./deploy.sh --reset-owner-password to rotate the break-glass owner password."
