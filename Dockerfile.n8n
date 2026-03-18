@@ -7,7 +7,7 @@ FROM node:${NODE_VERSION}-alpine AS chutes-nodes-builder
 
 WORKDIR /build
 COPY build/n8n-nodes-chutes/ ./
-RUN npm ci --ignore-scripts && npm run build
+RUN npm ci --ignore-scripts && npm run build && rm -rf node_modules && npm ci --ignore-scripts --omit=dev
 
 FROM --platform=$BUILDPLATFORM n8nio/base:${NODE_VERSION} AS n8n-builder
 
