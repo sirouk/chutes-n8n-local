@@ -2,6 +2,7 @@ ARG NODE_VERSION=24.13.1
 ARG N8N_VERSION=2.12.1
 ARG N8N_SOURCE_REPO=https://github.com/n8n-io/n8n.git
 ARG N8N_SOURCE_REF=n8n@2.12.1
+ARG N8N_BUILD_CONCURRENCY=4
 
 FROM node:${NODE_VERSION}-alpine AS chutes-nodes-builder
 
@@ -13,6 +14,7 @@ FROM --platform=$BUILDPLATFORM n8nio/base:${NODE_VERSION} AS n8n-builder
 
 ARG N8N_SOURCE_REPO
 ARG N8N_SOURCE_REF
+ARG N8N_BUILD_CONCURRENCY
 
 WORKDIR /src
 
@@ -28,8 +30,8 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 RUN attempts=0; \
     until [ "$attempts" -ge 6 ]; do \
         attempts=$((attempts + 1)); \
-        echo "Running pnpm build (attempt ${attempts}/6)"; \
-        if pnpm build; then \
+        echo "Running pnpm build (attempt ${attempts}/6, turbo concurrency=${N8N_BUILD_CONCURRENCY})"; \
+        if pnpm exec turbo run build --concurrency="${N8N_BUILD_CONCURRENCY}"; then \
             break; \
         fi; \
         if [ "$attempts" -ge 6 ]; then \
