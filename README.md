@@ -15,9 +15,9 @@ Build workflows with Chutes-native auth, multi-modal capabilities, and node inte
 
 ```bash
 docker run --rm -it \
+  --pull always \
   --platform linux/amd64 \
-  -p 80:80 -p 443:443 \
-  -v chutes_n8n_data:/data \
+  -p 443:443 \
   ghcr.io/chutesai/chutes-n8n-local:latest
 ```
 
@@ -146,7 +146,6 @@ Run it interactively and let the container prompt for settings:
 ```bash
 docker run --rm -it \
   -p 80:80 -p 443:443 \
-  -v chutes_n8n_data:/data \
   chutes-n8n-local:local-repo
 ```
 
@@ -155,7 +154,6 @@ Run it non-interactively in local mode:
 ```bash
 docker run --rm -it \
   -p 80:80 -p 443:443 \
-  -v chutes_n8n_data:/data \
   -e INSTALL_MODE=local \
   -e CHUTES_TRAFFIC_MODE=direct \
   -e CHUTES_OAUTH_CLIENT_ID=... \
@@ -168,7 +166,6 @@ Run it non-interactively in domain mode:
 ```bash
 docker run --rm -it \
   -p 80:80 -p 443:443 \
-  -v chutes_n8n_data:/data \
   -e INSTALL_MODE=domain \
   -e N8N_HOST=n8n.example.com \
   -e ACME_EMAIL=you@example.com \
@@ -176,6 +173,12 @@ docker run --rm -it \
   -e CHUTES_OAUTH_CLIENT_ID=... \
   -e CHUTES_OAUTH_CLIENT_SECRET=... \
   chutes-n8n-local:local-repo
+```
+
+If you want the standalone container to keep its config, workflows, and SQLite database between runs, add:
+
+```bash
+-v chutes_n8n_data:/data
 ```
 
 Standalone runtime knobs:
