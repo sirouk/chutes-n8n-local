@@ -15,6 +15,7 @@ Build workflows with Chutes-native auth, multi-modal capabilities, and node inte
 
 ```bash
 docker run --rm -it \
+  --platform linux/amd64 \
   -p 80:80 -p 443:443 \
   -v chutes_n8n_data:/data \
   ghcr.io/chutesai/chutes-n8n-local:latest

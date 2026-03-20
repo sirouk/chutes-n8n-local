@@ -290,8 +290,26 @@ else
 
     # --- OAuth credentials ---
     echo
-    echo "  Configure your Chutes OAuth client with this redirect URI:"
-    echo "    https://${N8N_HOST}/rest/sso/chutes/callback"
+    echo "  Create a Chutes app first:"
+    echo "    https://chutes.ai/app/settings/apps"
+    echo
+    echo "  Suggested app fields:"
+    echo "    App Name:     Chutes n8n"
+    echo "    Description:  Sign in to your Chutes n8n workspace"
+    echo "    Homepage URL: https://${N8N_HOST}"
+    if [ "$INSTALL_MODE" = "local" ]; then
+        echo "    Redirect URI: https://${LOCAL_HOSTNAME}/rest/sso/chutes/callback"
+        echo "                  since you are using it locally, use this"
+    else
+        echo "    Redirect URI: https://${N8N_HOST}/rest/sso/chutes/callback"
+    fi
+    echo
+    echo "  Scopes to select:"
+    echo "    Profile"
+    echo "    Chutes Read"
+    echo "    Chutes Invoke"
+    echo
+    echo "  Paste the Client ID and Client Secret below."
     prompt_required CHUTES_OAUTH_CLIENT_ID "Chutes OAuth Client ID"
     prompt_required CHUTES_OAUTH_CLIENT_SECRET "Chutes OAuth Client Secret" true
 
